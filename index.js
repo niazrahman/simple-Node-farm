@@ -16,15 +16,42 @@ const http = require('http');
 // })
 
 // console.log('I am reading....')
+const replaceTemplate = (temp,product) =>{
+    let output = temp.replace(/{%PRODUCTNAME%}/g,product.productName)
+    output = output.replace(/{%IMAGE%}/g,product.image)
+    output = output.replace(/{%FROM%}/g,product.from)
+    output = output.replace(/{%NUTRIENTS%}/g,product.nutrients)
+    output = output.replace(/{%QUANTITY%}/g,product.quantity)
+    output = output.replace(/{%PRICE%}/g,product.price)
+    output = output.replace(/{%DESCRIPTION%}/g,product.description)
+    output = output.replace(/{%ID%}/g,product.id)
+
+    if(!product.organic) output = output.replace(/{%NOT-ORGANIC%}/g,'not-organic')
+    return output
+    
+}
+const tempOverview = fs.readFileSync(`${__dirname}/starter/templates/template-overview.html`,'utf8')
+const tempCard = fs.readFileSync(`${__dirname}/starter/templates/template-card.html`,'utf8')
+const tempProduct = fs.readFileSync(`${__dirname}/starter/templates/template-product.html`,'utf8')
 const data =  fs.readFileSync(`${__dirname}/starter/dev-data/data.json`,'utf8')
 const dataObj = JSON.parse(data)
 const app = http.createServer((req,res)=>{
     const path = req.url
+    // overview
     if(path==='/' || path === '/overview'){
-        res.end('<h1>Hello from the server!</h1>')
-    }else if(path === '/product'){
+        res.writeHead(200,{
+            'content-Type' : 'text/html',
+        })
+        const cardsHtml = dataObj.map(el => replaceTemplate(tempCard,el)).join('')
+        const output = tempOverview.replace('{%PRODUCT_CARDS%}',cardsHtml)
+        res.end(output)
+    }
+    // product
+    else if(path === '/product'){
         res.end('This is product page!!')
-    }else if(path === '/api'){
+    }
+    // api
+    else if(path === '/api'){
     
         res.writeHead(200,{
             'content-Type' : 'application/json',
@@ -32,6 +59,7 @@ const app = http.createServer((req,res)=>{
         res.end(data)
             
     }
+    // 404 page
     else{
         res.writeHead(404,{
             contentType : 'text/html'
