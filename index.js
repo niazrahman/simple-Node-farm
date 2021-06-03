@@ -1,5 +1,6 @@
 const fs = require('fs');
 const http = require('http');
+const url = require('url')
 
 // fs.readFile('./starter/txt/start.txt','utf8',(err,data1)=>{
 //     if(err) return console.error('Error!!!')
@@ -36,9 +37,9 @@ const tempProduct = fs.readFileSync(`${__dirname}/starter/templates/template-pro
 const data =  fs.readFileSync(`${__dirname}/starter/dev-data/data.json`,'utf8')
 const dataObj = JSON.parse(data)
 const app = http.createServer((req,res)=>{
-    const path = req.url
+    const{query,pathname}=(url.parse(req.url,true))
     // overview
-    if(path==='/' || path === '/overview'){
+    if(pathname==='/' || pathname === '/overview'){
         res.writeHead(200,{
             'content-Type' : 'text/html',
         })
@@ -47,11 +48,16 @@ const app = http.createServer((req,res)=>{
         res.end(output)
     }
     // product
-    else if(path === '/product'){
-        res.end('This is product page!!')
+    else if(pathname === '/product'){
+        res.writeHead(200,{
+            'content-Type' : 'text/html',
+        })
+        const product = dataObj[query.id]
+        const output = replaceTemplate(tempProduct,product)
+        res.end(output)
     }
     // api
-    else if(path === '/api'){
+    else if(pathname === '/api'){
     
         res.writeHead(200,{
             'content-Type' : 'application/json',
