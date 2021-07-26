@@ -78,7 +78,7 @@ const app = http.createServer((req, res) => {
         res.writeHead(404, {
             'Content-type': 'text/html',
         });
-        res.end('Page not found!');
+        res.end('Page Not Found!');
     }
 });
 
